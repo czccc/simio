@@ -2,15 +2,16 @@
 // Created by Cheng on 2021/2/28.
 //
 
-#include "waker.h"
 #include <sys/eventfd.h>
 #include <cerrno>
+
+#include "simio.h"
 
 namespace simio {
 
 namespace sys {
 
-Waker::Waker(EpollSelector selector, Token token) {
+Waker::Waker(const Selector &selector, Token token) {
     fd = eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
     //    fd = open(fd_raw);
     selector.event_register(fd, token, Interest::READABLE());
