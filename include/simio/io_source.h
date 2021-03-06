@@ -17,6 +17,13 @@ namespace simio {
 class SelectorID {
   public:
     explicit SelectorID(int id = 0) : id(id) {}
+    SelectorID(const SelectorID &rhs) : id(rhs.id.load()) {}
+    SelectorID &operator=(const SelectorID &rhs) {
+        if (this != &rhs) {
+            id.store(rhs.id.load());
+        }
+        return *this;
+    }
     SelectorID(SelectorID &&rhs) noexcept: id(rhs.id.load()) {}
     SelectorID &operator=(SelectorID &&rhs) noexcept {
         if (this != &rhs) {
@@ -54,41 +61,45 @@ class SelectorID {
 template<typename T>
 class IOSource : EventSource {
   public:
-    explicit IOSource(T io) : state(), inner(io), selector_id(0) {}
-    IOSource(IOSource<T> &&rhs) noexcept: state(rhs.state), inner(rhs.inner), selector_id(std::move(rhs.selector_id)) {}
-    IOSource &operator=(IOSource<T> &&rhs) noexcept {
+    explicit IOSource(T &io) : state_(), inner_ptr_(io), selector_id_(0) {}
+    IOSource(const IOSource<T> &rhs) noexcept
+        : state_(rhs.state_), inner_ptr_(rhs.inner_ptr_), selector_id_(std::move(rhs.selector_id_)) {}
+    IOSource &operator=(const IOSource<T> &rhs) noexcept {
         if (this != &rhs) {
-            state = rhs.state;
-            inner = rhs.inner;
-            selector_id = std::move(rhs.selector_id);
+            state_ = rhs.state_;
+            inner_ptr_ = rhs.inner_ptr_;
+            selector_id_ = std::move(rhs.selector_id_);
         }
         return *this;
     }
 
-    T get_inner() { return inner; }
+    // int as_raw_fd() const { return inner_ptr_->as_raw_fd(); }
+    T get_inner() const { return inner_ptr_; }
 
-    using IOCallback = std::function<int(T)>;
-    int do_io(const IOCallback &f) {
-        state.do_io<T>(f, inner);
+    // using IOCallback = std::function<int()>;
+    template<typename IOCallback, typename RET>
+    RET do_io(const IOCallback &f) {
+        // return state_.do_io<IOCallback, T, RET>(f, inner_ptr_);
+        return f(inner_ptr_);
     }
 
     void event_register(Registry *registry, Token token, Interest interest) override {
-        selector_id.associate(*registry);
-        registry->get_selector().event_register(inner.as_raw_fd(), token, interest);
+        selector_id_.associate(*registry);
+        registry->get_selector().event_register(inner_ptr_->as_raw_fd(), token, interest);
     }
     void event_reregister(Registry *registry, Token token, Interest interest) override {
-        selector_id.check_association(*registry);
-        registry->get_selector().event_reregister(inner.as_raw_fd(), token, interest);
+        selector_id_.check_association(*registry);
+        registry->get_selector().event_reregister(inner_ptr_->as_raw_fd(), token, interest);
     }
     void event_deregister(Registry *registry) override {
-        selector_id.remove_association(*registry);
-        registry->get_selector().event_deregister(inner.as_raw_fd());
+        selector_id_.remove_association(*registry);
+        registry->get_selector().event_deregister(inner_ptr_->as_raw_fd());
     }
 
   private:
-    sys::IOSourceState state{};
-    T inner;
-    SelectorID selector_id{0};
+    sys::IOSourceState state_{};
+    T inner_ptr_;
+    SelectorID selector_id_{0};
 };
 
 }

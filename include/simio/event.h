@@ -26,15 +26,13 @@ class EventSource {
     virtual void event_deregister(Registry *registry) = 0;
 };
 
-/// `Event` is a readiness state paired with a Token. It is returned by Poll::poll.
+/// `Event` is a readiness state_ paired with a Token. It is returned by Poll::poll.
 class Event {
-  protected:
+  public:
 
     static Event from_sys_event(const sys::Event &ev) {
         return Event(ev);
     }
-
-  public:
 
     Token token() { return sys::get_token(inner); }
 
@@ -56,26 +54,32 @@ class Event {
 };
 
 /// A list of event returned by Poll
-using EventList = std::vector<Event>;
+// using EventList = std::vector<Event>;
 
-// class EventList {
-//
-//   public:
-//
-//     explicit EventList(int capacity) : inner(sys::EventList(capacity)) {}
-//
-//     uint32_t capacity() { return inner.capacity(); }
-//
-//     bool is_empty() { return inner.empty(); }
-//
-//     void clear() { inner.clear(); }
-//
-//     sys::EventList &get_inner() { return inner; }
-//
-//   private:
-//
-//     sys::EventList inner;
-// };
+class EventList {
+
+  public:
+
+    explicit operator sys::EventList() {
+        return inner_;
+    }
+    sys::EventList &as_vec() {
+        return inner_;
+    }
+    explicit EventList(int capacity) : inner_(sys::EventList(capacity)) {}
+
+    uint32_t capacity() { return inner_.capacity(); }
+
+    bool is_empty() { return inner_.empty(); }
+
+    void clear() { inner_.clear(); }
+
+    sys::EventList &get_inner() { return inner_; }
+
+  private:
+
+    sys::EventList inner_;
+};
 
 }
 

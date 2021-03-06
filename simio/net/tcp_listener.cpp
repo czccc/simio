@@ -5,31 +5,47 @@
 #include "simio.h"
 
 simio::TcpListener simio::TcpListener::bind(simio::SocketAddr addr) {
-    TcpSocket socket = TcpSocket::new_for_addr(addr);
-    socket.set_reuse_addr(true);
-    socket.bind(addr.get());
-    socket.listen(1024);
-    return TcpListener(socket);
-}
-simio::TcpListener simio::TcpListener::from_socket(const simio::TcpSocket &socket) {
+    TcpSocketPtr socket(TcpSocket::new_for_addr(addr));
+    socket->set_reuse_addr(true);
+    socket->bind(addr);
+    socket->listen(1024);
     return TcpListener(socket);
 }
 
-std::pair<simio::TcpSocket, simio::SocketAddr> simio::TcpListener::accept() {
-    // TODO
-    // return std::pair<TcpSocket, SocketAddr>({});
+simio::TcpListener simio::TcpListener::bind(const std::string &addr) {
+    return TcpListener::bind(SocketAddr(addr));
+}
+simio::TcpListener simio::TcpListener::from_socket(simio::TcpSocketPtr socket) {
+    return TcpListener(socket);
 }
 
-simio::SocketAddr simio::TcpListener::local_addr() {
-    SocketAddr addr = sys::get_local_addr(as_raw_fd());
-    return addr;
+std::pair<simio::TcpStream, simio::SocketAddr> simio::TcpListener::accept() {
+    auto call_back = [&](const simio::TcpSocketPtr &socket_ptr) -> std::pair<simio::TcpStream, simio::SocketAddr> {
+        auto ret = socket_ptr->accept();
+        return std::make_pair(TcpStream::from_socket(ret.first), ret.second);
+    };
+    return inner.do_io<decltype(call_back), std::pair<simio::TcpStream, simio::SocketAddr>>(call_back);
+}
+
+simio::SocketAddr simio::TcpListener::local_addr() const {
+    return inner.get_inner()->get_local_addr();
 }
 bool simio::TcpListener::set_ttl(int ttl) {
-    return sys::set_ttl(as_raw_fd(), ttl);
+    return inner.get_inner()->set_ttl(ttl);
 }
 int simio::TcpListener::get_ttl() {
-    return sys::get_ttl(as_raw_fd());
+    return inner.get_inner()->get_ttl();
 }
 bool simio::TcpListener::set_nonblocking(bool nonblocking) {
-    return sys::set_nonblocking(as_raw_fd(), nonblocking);
+    return inner.get_inner()->set_nonblocking(nonblocking);
+}
+
+void simio::TcpListener::event_register(simio::Registry *registry, simio::Token token, simio::Interest interest) {
+    inner.event_register(registry, token, interest);
+}
+void simio::TcpListener::event_reregister(simio::Registry *registry, simio::Token token, simio::Interest interest) {
+    inner.event_reregister(registry, token, interest);
+}
+void simio::TcpListener::event_deregister(simio::Registry *registry) {
+    inner.event_deregister(registry);
 }

@@ -2,33 +2,98 @@
 // Created by Cheng on 2021/3/4.
 //
 
+#include <simio/tcp.h>
+
 #include "simio.h"
 
 simio::TcpStream simio::TcpStream::connect(simio::SocketAddr addr) {
-    TcpSocket socket = TcpSocket::new_for_addr(addr);
+    TcpSocketPtr socket = TcpSocket::new_for_addr(addr);
+    try {
+        socket->connect(addr);
+    } catch (std::runtime_error &e) {
+
+    }
     return TcpStream(socket);
 }
-simio::TcpStream simio::TcpStream::from_socket(const simio::TcpSocket &socket) {
+
+simio::TcpStream simio::TcpStream::from_socket(simio::TcpSocketPtr &socket) {
     return TcpStream(socket);
 }
-simio::SocketAddr simio::TcpStream::peer_addr() {
-    SocketAddr addr = sys::get_peer_addr(as_raw_fd());
-    return addr;
+
+simio::SocketAddr simio::TcpStream::peer_addr() const {
+    return inner.get_inner()->get_peer_addr();
 }
-simio::SocketAddr simio::TcpStream::local_addr() {
-    SocketAddr addr = sys::get_local_addr(as_raw_fd());
-    return addr;
+simio::SocketAddr simio::TcpStream::local_addr() const {
+    return inner.get_inner()->get_local_addr();
 }
 bool simio::TcpStream::shutdown(bool read, bool write) {
-    return sys::shutdown(as_raw_fd(), read, write);
+    return inner.get_inner()->shutdown(read, write);
 }
 
 bool simio::TcpStream::set_nodelay(bool nodelay) {
-    return sys::set_nodelay(as_raw_fd(), nodelay);
+    return inner.get_inner()->set_nodelay(nodelay);
 }
 bool simio::TcpStream::get_nodelay() {
-    return sys::get_nodelay(as_raw_fd());
+    return inner.get_inner()->get_nodelay();
 }
 bool simio::TcpStream::set_nonblocking(bool nonblocking) {
-    return sys::set_nonblocking(as_raw_fd(), nonblocking);
+    return inner.get_inner()->set_nonblocking(nonblocking);
+}
+
+bool simio::TcpStream::set_ttl(bool ttl) {
+    return inner.get_inner()->set_ttl(ttl);
+}
+bool simio::TcpStream::get_ttl() {
+    return inner.get_inner()->get_ttl();
+}
+//
+// int simio::TcpStream::peek(std::vector<char> &buf) {
+//     auto call_back = [&](int fd) -> int { return sys::peek(fd, (void *) buf.data(), buf.size()); };
+//     return inner.do_io<decltype(call_back), int>(call_back);
+// }
+int simio::TcpStream::send(const std::vector<char> &buf) {
+    auto call_back = [&](const simio::TcpSocketPtr &socket_ptr) -> int { return socket_ptr->send(buf); };
+    return inner.do_io<decltype(call_back), int>(call_back);
+}
+int simio::TcpStream::send(const std::string &buf) {
+    auto call_back = [&](const simio::TcpSocketPtr &socket_ptr) -> int { return socket_ptr->send(buf); };
+    return inner.do_io<decltype(call_back), int>(call_back);
+}
+int simio::TcpStream::recv(std::vector<char> &buf) {
+    auto call_back = [&](const simio::TcpSocketPtr &socket_ptr) -> int { return socket_ptr->recv(buf); };
+    return inner.do_io<decltype(call_back), int>(call_back);
+}
+int simio::TcpStream::recv(std::string &buf) {
+    auto call_back = [&](const simio::TcpSocketPtr &socket_ptr) -> int { return socket_ptr->recv(buf); };
+    return inner.do_io<decltype(call_back), int>(call_back);
+}
+// int simio::TcpStream::read(std::vector<char> &buf) {
+//     auto call_back =
+//         [&](const simio::TcpSocketPtr &socket_ptr) -> int { return sys::read(fd, (void *) buf.data(), buf.size()); };
+//     return inner.do_io<decltype(call_back), int>(call_back);
+// }
+// int simio::TcpStream::write(const std::vector<char> &buf) {
+//     auto call_back =
+//         [&](const simio::TcpSocketPtr &socket_ptr) -> int { return sys::write(fd, (void *) buf.data(), buf.size()); };
+//     return inner.do_io<decltype(call_back), int>(call_back);
+// }
+// int simio::TcpStream::read_vectored(std::vector<struct iovec> &buf) {
+//     auto call_back =
+//         [&](const simio::TcpSocketPtr &socket_ptr) -> int { return sys::read_vectored(fd, buf.data(), buf.size()); };
+//     return inner.do_io<decltype(call_back), int>(call_back);
+// }
+// int simio::TcpStream::write_vectored(const std::vector<struct iovec> &buf) {
+//     auto call_back =
+//         [&](const simio::TcpSocketPtr &socket_ptr) -> int { return sys::write_vectored(fd, buf.data(), buf.size()); };
+//     return inner.do_io<decltype(call_back), int>(call_back);
+// }
+
+void simio::TcpStream::event_register(simio::Registry *registry, simio::Token token, simio::Interest interest) {
+    inner.event_register(registry, token, interest);
+}
+void simio::TcpStream::event_reregister(simio::Registry *registry, simio::Token token, simio::Interest interest) {
+    inner.event_reregister(registry, token, interest);
+}
+void simio::TcpStream::event_deregister(simio::Registry *registry) {
+    inner.event_deregister(registry);
 }

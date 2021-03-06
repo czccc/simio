@@ -1,4 +1,4 @@
-aux_source_directory(./sys/unix SYS_UNIX_SRCS)
+aux_source_directory(./unix SYS_UNIX_SRCS)
 aux_source_directory(./net NET_SRCS)
 
 #message("${SYS_UNIX_SRCS}")

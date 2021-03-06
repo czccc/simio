@@ -47,7 +47,7 @@ class Selector {
     // Selector(Selector &&rhs) noexcept;
     // Selector &operator=(Selector &&rhs) noexcept;
 
-    int select(EventList events, int timeout) const;
+    int select(EventList &events, int timeout) const;
 
     void event_register(int fd, Token token, const Interest &interest) const;
 
@@ -69,57 +69,58 @@ class Selector {
 
 };
 
-Token get_token(Event event) {
-    return event.data.u64;
-}
+Token get_token(Event event);
 
-bool is_readable(Event event) {
-    return (event.events & EPOLLIN) || (event.events & EPOLLPRI);
-}
+bool is_readable(Event event);
 
-bool is_writable(Event event) {
-    return event.events & EPOLLOUT;
-}
+bool is_writable(Event event);
 
-bool is_priority(Event event) {
-    return event.events & EPOLLPRI;
-}
+bool is_priority(Event event);
 
-bool is_error(Event event) {
-    return event.events & EPOLLERR;
-}
+bool is_error(Event event);
 
-bool is_read_closed(Event event) {
-    return event.events & EPOLLHUP || (event.events & EPOLLIN && event.events & EPOLLHUP);
-}
+bool is_read_closed(Event event);
 
-bool is_write_closed(Event event) {
-    return event.events & EPOLLHUP || (event.events & EPOLLOUT && event.events & EPOLLERR) ||
-        (event.events & EPOLLERR);
-}
+bool is_write_closed(Event event);
 
 class IOSourceState {
   public:
     IOSourceState() = default;
 
-    template<typename T>
-    using IOCallback = std::function<int(T)>;
+    // template<typename T>
+    // using IOCallback = std::function<int(T)>;
 
-    template<typename T>
-    int do_io(IOCallback<T> f, T &io) {
-        return f(io);
+    template<typename IOCallback, typename T, typename RET>
+    RET do_io(const IOCallback &f, T &io) {
+        return f(io->as_raw_fd());
     }
 };
 
+int read(int fd, void *buf, size_t count);
+int read_vectored(int fd, struct iovec *iov, int iovcnt);
+int write(int fd, const void *buf, size_t count);
+int write_vectored(int fd, const struct iovec *iov, int iovcnt);
+
 using TcpSocket = int;
+
+// int peek(int fd, void *buf, size_t count);
+// int recv(int fd, void *buf, size_t count);
+// int peek_from(int fd, void *buf, size_t count, SocketAddr &addr);
+// int recv_from(int fd, void *buf, size_t count, SocketAddr &addr);
+// int flush(int fd);
+
+int send(TcpSocket socket, const std::vector<char> &buf, int flag = 0);
+int recv(TcpSocket socket, std::vector<char> &buf, int flag = 0);
+int send(TcpSocket socket, const std::string &buf, int flag = 0);
+int recv(TcpSocket socket, std::string &buf, int flag = 0);
 
 TcpSocket new_v4_socket();
 TcpSocket new_v6_socket();
-int bind(TcpSocket socket, const sockaddr *addr);
-int connect(TcpSocket socket, const sockaddr *addr);
-std::pair<TcpSocket, const sockaddr *> accept(TcpSocket listener);
-int listen(TcpSocket socket, int backlog);
-int close(TcpSocket socket);
+bool bind(TcpSocket socket, const SocketAddr &addr);
+bool connect(TcpSocket socket, const SocketAddr &addr);
+std::pair<TcpSocket, SocketAddr> accept(TcpSocket listener);
+bool listen(TcpSocket socket, int backlog);
+bool close(TcpSocket socket);
 bool set_reuseaddr(TcpSocket socket, bool reuseaddr);
 bool get_reuseaddr(TcpSocket socket);
 bool set_reuse_port(TcpSocket socket, bool reuseport);

@@ -56,8 +56,8 @@ class Poll {
     Registry *get_registry() {
         return &registry;
     }
-    void poll(sys::EventList event, int timeout) {
-        registry.get_selector().select(std::move(event), timeout);
+    void poll(EventList &events, int timeout_ms) {
+        registry.get_selector().select(reinterpret_cast<sys::EventList &>(events), timeout_ms);
     }
   private:
     Registry registry;

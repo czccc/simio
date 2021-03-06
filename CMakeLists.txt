@@ -20,14 +20,18 @@ project(simio)
 #set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_OUTPUT_DIR}/lib)
 
 
-set(CMAKE_CXX_STANDARD 14)
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -lpthread")
 
 # INCLUDE for C/C++ include
 set(PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_INCLUDE_DIR})
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/simio)
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/test)
+
+link_directories(${PROJECT_SOURCE_DIR}/simio)
 
 # create executable-file
 # add_executable(exe-filename needed-C_or_C++file)
