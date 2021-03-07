@@ -8,39 +8,42 @@
 #include <atomic>
 #include <stdexcept>
 
-#include "base.h"
-#include "unix.h"
-#include "poll.h"
+#include "simio/base/token.h"
+#include "simio/base/interest.h"
+#include "simio/base/poll.h"
+#include "simio/base/registry.h"
+#include "simio/sys.h"
+#include "simio/event.h"
 
 namespace simio {
 
 class SelectorID {
   public:
-    explicit SelectorID(int id = 0) : id(id) {}
-    SelectorID(const SelectorID &rhs) : id(rhs.id.load()) {}
+    explicit SelectorID(int id = 0) : id_(id) {}
+    SelectorID(const SelectorID &rhs) : id_(rhs.id_.load()) {}
     SelectorID &operator=(const SelectorID &rhs) {
         if (this != &rhs) {
-            id.store(rhs.id.load());
+            id_.store(rhs.id_.load());
         }
         return *this;
     }
-    SelectorID(SelectorID &&rhs) noexcept: id(rhs.id.load()) {}
+    SelectorID(SelectorID &&rhs) noexcept: id_(rhs.id_.load()) {}
     SelectorID &operator=(SelectorID &&rhs) noexcept {
         if (this != &rhs) {
-            id.store(rhs.id.load());
+            id_.store(rhs.id_.load());
         }
         return *this;
     }
 
     bool associate(Registry &registry) {
         int reg_id = registry.get_selector().get_id();
-        int pre_id = id.exchange(reg_id);
+        int pre_id = id_.exchange(reg_id);
 
         return pre_id == 0;
     }
     bool check_association(Registry &registry) {
         int reg_id = registry.get_selector().get_id();
-        int pre_id = id.load();
+        int pre_id = id_.load();
 
         if (pre_id == 0 || pre_id != reg_id) {
             return false;
@@ -50,12 +53,12 @@ class SelectorID {
     }
     bool remove_association(Registry &registry) {
         int reg_id = registry.get_selector().get_id();
-        int pre_id = id.exchange(0);
+        int pre_id = id_.exchange(0);
 
         return reg_id == pre_id;
     }
   private:
-    std::atomic<int> id;
+    std::atomic<int> id_;
 };
 
 template<typename T>

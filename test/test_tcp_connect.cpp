@@ -25,7 +25,7 @@ const SocketAddr addr("127.0.0.1:5679");
 // }
 
 
-void ping_pong(TcpStream stream, Poll &poll, Event ev, const string &pre) {
+int ping_pong(TcpStream stream, Poll &poll, Event ev, const string &pre) {
     if (ev.is_readable()) {
         // std::vector<char> buf(20);
         string buf(20, 0);
@@ -46,9 +46,14 @@ void ping_pong(TcpStream stream, Poll &poll, Event ev, const string &pre) {
         cout << pre << " " << stream << " neither read or write" << endl;
     }
     usleep(500000 + rand() % 50000);
+    if ((rand() % 10) < 1) {
+        return -1;
+    } else {
+        return 0;
+    }
 }
 
-void client_loop() {
+void client_loop(string id) {
     sleep(2);
 
     TcpStream client = TcpStream::connect(addr);
@@ -61,7 +66,7 @@ void client_loop() {
     EventList events(10);
     poll.get_registry()->event_register(&client, client_token, Interest::WRITABLE() | Interest::READABLE());
 
-    std::cout << "client Poll id: " << poll.get_registry()->get_selector().get_id() << " start loop.." << std::endl;
+    std::cout << "client Poll id_: " << poll.get_registry()->get_selector().get_id() << " start loop.." << std::endl;
 
     while (true) {
         poll.poll(events, 1000);
@@ -75,7 +80,10 @@ void client_loop() {
                     try {
                         // auto new_accept = listener.accept();
                         // std::cout << "client connection to addr: " << addr << " " << client << std::endl;
-                        ping_pong(client, poll, Event::from_sys_event(ev), "client");
+                        int ret = ping_pong(client, poll, Event::from_sys_event(ev), id);
+                        if (ret < 0) {
+                            exit(0);
+                        }
                     } catch (std::system_error &e) {
                         std::cout << "client " << e.what() << std::endl;
                     }
@@ -88,7 +96,7 @@ void client_loop() {
 
 }
 
-void server() {
+void server(string id) {
 
     TcpListener listener = TcpListener::bind(addr);
     Token listener_token = 0;
@@ -101,7 +109,7 @@ void server() {
     EventList events(10);
     poll.get_registry()->event_register(&listener, listener_token, Interest::READABLE() | Interest::WRITABLE());
 
-    std::cout << "server Poll id: " << poll.get_registry()->get_selector().get_id() << " start loop.." << std::endl;
+    std::cout << "server Poll id_: " << poll.get_registry()->get_selector().get_id() << " start loop.." << std::endl;
 
     while (true) {
         poll.poll(events, 1000);
@@ -118,7 +126,7 @@ void server() {
                                   << std::endl;
                         poll.get_registry()->event_register(&new_accept.first,
                                                             next_token,
-                                                            Interest::WRITABLE());
+                                                            Interest::WRITABLE() | Interest::READABLE());
                         m.insert({next_token, new_accept.first});
                         next_token++;
                     } catch (std::system_error &e) {
@@ -129,7 +137,10 @@ void server() {
                     try {
                         Token t = Event::from_sys_event(ev).token();
                         auto s = m.find(t);
-                        ping_pong(s->second, poll, Event::from_sys_event(ev), "server");
+                        int ret = ping_pong(s->second, poll, Event::from_sys_event(ev), id);
+                        if (ret < 0) {
+                            exit(0);
+                        }
                     } catch (std::system_error &e) {
                         std::cout << "server" << e.what() << std::endl;
                     }
@@ -140,9 +151,11 @@ void server() {
 }
 
 int main() {
-    thread t1(client_loop);
-    thread t2(server);
+    thread t1(server, "server  ");
+    thread t2(client_loop, "client-1");
+    thread t3(client_loop, "client-2");
 
     t1.join();
     t2.join();
+    t3.join();
 }

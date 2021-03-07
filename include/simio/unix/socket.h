@@ -1,9 +1,9 @@
 //
-// Created by Cheng on 2021/3/4.
+// Created by Cheng on 2021/3/7.
 //
 
-#ifndef SIMIO_INCLUDE_SIMIO_UNIX_H_
-#define SIMIO_INCLUDE_SIMIO_UNIX_H_
+#ifndef SIMIO_INCLUDE_SIMIO_UNIX_SOCKET_H_
+#define SIMIO_INCLUDE_SIMIO_UNIX_SOCKET_H_
 
 #include <sys/epoll.h>
 #include <vector>
@@ -12,89 +12,12 @@
 #include <netinet/in.h>
 #include <string>
 
-#include "base.h"
+#include "simio/base/token.h"
+#include "simio/base/interest.h"
+#include "simio/base/socket_addr.h"
 
 namespace simio {
-
 namespace sys {
-
-class Selector;
-
-class Waker {
-  public:
-    Waker(const Selector &s, Token token);
-    ~Waker() = default;
-
-    bool wake();
-    bool reset() const;
-
-  private:
-    int fd;
-};
-
-using Event = epoll_event;
-using EventList = std::vector<Event>;
-
-class Selector {
-  public:
-
-    Selector();
-    ~Selector();
-
-    // Selector(Selector &rhs);
-    // Selector &operator=(Selector const &rhs);
-
-    // Selector(Selector &&rhs) noexcept;
-    // Selector &operator=(Selector &&rhs) noexcept;
-
-    int select(EventList &events, int timeout) const;
-
-    void event_register(int fd, Token token, const Interest &interest) const;
-
-    void event_reregister(int fd, Token token, const Interest &interest) const;
-
-    void event_deregister(int fd) const;
-
-    bool register_waker();
-
-    int get_id() const {
-        return id;
-    }
-
-  private:
-    static std::atomic<int> next_id;
-    int id;
-    int ep;
-    std::atomic<bool> has_waker;
-
-};
-
-Token get_token(Event event);
-
-bool is_readable(Event event);
-
-bool is_writable(Event event);
-
-bool is_priority(Event event);
-
-bool is_error(Event event);
-
-bool is_read_closed(Event event);
-
-bool is_write_closed(Event event);
-
-class IOSourceState {
-  public:
-    IOSourceState() = default;
-
-    // template<typename T>
-    // using IOCallback = std::function<int(T)>;
-
-    template<typename IOCallback, typename T, typename RET>
-    RET do_io(const IOCallback &f, T &io) {
-        return f(io->as_raw_fd());
-    }
-};
 
 int read(int fd, void *buf, size_t count);
 int read_vectored(int fd, struct iovec *iov, int iovcnt);
@@ -160,4 +83,4 @@ int get_keepalive_retries(TcpSocket socket);
 }
 }
 
-#endif //SIMIO_INCLUDE_SIMIO_UNIX_H_
+#endif //SIMIO_INCLUDE_SIMIO_UNIX_SOCKET_H_

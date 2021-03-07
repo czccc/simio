@@ -1,18 +1,18 @@
+# add google test
+add_subdirectory(googletest)
+include_directories(googletest/googletest/include googletest/googletest/src)
+include_directories(googletest/googlemock/include googletest/googlemock/src)
 
-add_executable(test_socket_addr test_socket_addr.cpp)
+# base
+add_subdirectory(base)
 
-add_executable(test_tcp_socket test_tcp_socket.cpp)
-target_link_libraries(test_tcp_socket simio pthread)
+# Now simply link against gtest or gtest_main as needed. Eg
+add_executable(gtest_example gtest_example.cpp)
+target_link_libraries(gtest_example gtest gtest_main simio pthread)
+add_test(NAME gtest_example COMMAND ${CMAKE_BINARY_DIR}/gtest_example)
 
-add_executable(test_unix_socket test_unix_socket.cpp)
-target_link_libraries(test_unix_socket simio pthread)
+aux_source_directory(./base TEST_SIMIO_BASE_SRCS)
 
-
-add_executable(test_tcp_connect test_tcp_connect.cpp)
-target_link_libraries(test_tcp_connect simio pthread)
-
-#aux_source_directory(. TEST_CASE_CPP)
-#message("${TEST_CASE_CPP}")
-#foreach (test_case in TEST_CASE_CPP)
-#    message("${test_case}")
-#endforeach ()
+add_executable(simio_test_all ${TEST_SIMIO_BASE_SRCS})
+target_link_libraries(simio_test_all gtest gtest_main simio pthread)
+add_test(NAME simio_test_all COMMAND ${CMAKE_BINARY_DIR}/simio_test_all)

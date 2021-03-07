@@ -1,64 +1,22 @@
 //
-// Created by Cheng on 2021/3/4.
+// Created by Cheng on 2021/3/7.
 //
 
-#ifndef SIMIO_INCLUDE_SIMIO_BASE_H_
-#define SIMIO_INCLUDE_SIMIO_BASE_H_
+#ifndef SIMIO_INCLUDE_SIMIO_BASE_SOCKET_ADDR_H_
+#define SIMIO_INCLUDE_SIMIO_BASE_SOCKET_ADDR_H_
 
-#include <cinttypes>
-
-#include <functional>
-#include <arpa/inet.h>
-#include <netinet/in.h>
+#include <string>
 #include <iostream>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <sstream>
 
 namespace simio {
 
-using Token = uint64_t;
 
-class Interest {
-  public:
-    uint8_t inner;
-
-    explicit Interest(uint8_t val) : inner(val) {}
-    ~Interest() = default;
-
-    bool is_readable() const { return inner & READABLE_RAW; }
-    bool is_writable() const { return inner & WRITABLE_RAW; }
-
-    Interest add(const Interest &other) const { return Interest(inner | other.inner); }
-    Interest remove(const Interest &other) const {
-        // TODO: check inner_ptr_ is zero
-        return Interest(inner & !other.inner);
-    }
-
-    Interest operator|(const Interest &rhs) const {
-        return add(rhs);
-    }
-
-    static Interest READABLE() { return Interest(READABLE_RAW); }
-    static Interest WRITABLE() { return Interest(WRITABLE_RAW); }
-
-  private:
-
-    const static unsigned char READABLE_RAW = 0b0001;
-    const static unsigned char WRITABLE_RAW = 0b0010;
-
-};
-
-class noncopyable {
-  public:
-    noncopyable(const noncopyable &) = delete;
-    void operator=(const noncopyable &) = delete;
-
-  protected:
-    noncopyable() = default;
-    ~noncopyable() = default;
-};
-
-
-//     /* Structure describing an Internet socket address.  */
+//     /* Structure describing an Internet socket_ address.  */
 //     struct sockaddr_in {
 //         sa_family_t    sin_family; /* address family: AF_INET */
 //         uint16_t       sin_port;   /* port in network byte order */
@@ -76,7 +34,7 @@ class noncopyable {
 //         uint16_t        sin6_port;     /* port in network byte order */
 //         uint32_t        sin6_flowinfo; /* IPv6 flow information */
 //         struct in6_addr sin6_addr;     /* IPv6 address */
-//         uint32_t        sin6_scope_id; /* IPv6 scope-id */
+//         uint32_t        sin6_scope_id; /* IPv6 scope-id_ */
 //     };
 
 class SocketAddr {
@@ -103,7 +61,7 @@ class SocketAddr {
         sockaddr_in addr4{};
         addr4.sin_family = AF_INET;
         if (inet_pton(AF_INET, ip.c_str(), &addr4.sin_addr) <= 0) {
-            std::cout << "Error when parse ip: " << ip << "to socket addr" << std::endl;
+            std::cout << "Error when parse ip: " << ip << "to socket_ addr" << std::endl;
             abort();
         }
         addr4.sin_port = port;
@@ -115,7 +73,7 @@ class SocketAddr {
             sockaddr_in6 addr6{};
             addr6.sin6_family = AF_INET6;
             if (inet_pton(AF_INET6, ip.c_str(), &addr6.sin6_addr) <= 0) {
-                std::cout << "Error when parse ip: " << ip << "to socket addr" << std::endl;
+                std::cout << "Error when parse ip: " << ip << "to socket_ addr" << std::endl;
                 abort();
             }
             addr6.sin6_port = port;
@@ -124,7 +82,7 @@ class SocketAddr {
             sockaddr_in addr4{};
             addr4.sin_family = AF_INET;
             if (inet_pton(AF_INET, ip.c_str(), &addr4.sin_addr) <= 0) {
-                std::cout << "Error when parse ip: " << ip << "to socket addr" << std::endl;
+                std::cout << "Error when parse ip: " << ip << "to socket_ addr" << std::endl;
                 abort();
             }
             addr4.sin_port = port;
@@ -202,4 +160,4 @@ class SocketAddr {
 
 }
 
-#endif //SIMIO_INCLUDE_SIMIO_BASE_H_
+#endif //SIMIO_INCLUDE_SIMIO_BASE_SOCKET_ADDR_H_

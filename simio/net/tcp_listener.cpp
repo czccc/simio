@@ -2,7 +2,8 @@
 // Created by Cheng on 2021/3/4.
 //
 
-#include "simio.h"
+#include "simio/net/tcp_listener.h"
+#include "simio/net/tcp_stream.h"
 
 simio::TcpListener simio::TcpListener::bind(simio::SocketAddr addr) {
     TcpSocketPtr socket(TcpSocket::new_for_addr(addr));
@@ -24,28 +25,28 @@ std::pair<simio::TcpStream, simio::SocketAddr> simio::TcpListener::accept() {
         auto ret = socket_ptr->accept();
         return std::make_pair(TcpStream::from_socket(ret.first), ret.second);
     };
-    return inner.do_io<decltype(call_back), std::pair<simio::TcpStream, simio::SocketAddr>>(call_back);
+    return io_source_inner_.do_io<decltype(call_back), std::pair<simio::TcpStream, simio::SocketAddr>>(call_back);
 }
 
 simio::SocketAddr simio::TcpListener::local_addr() const {
-    return inner.get_inner()->get_local_addr();
+    return io_source_inner_.get_inner()->get_local_addr();
 }
 bool simio::TcpListener::set_ttl(int ttl) {
-    return inner.get_inner()->set_ttl(ttl);
+    return io_source_inner_.get_inner()->set_ttl(ttl);
 }
 int simio::TcpListener::get_ttl() {
-    return inner.get_inner()->get_ttl();
+    return io_source_inner_.get_inner()->get_ttl();
 }
 bool simio::TcpListener::set_nonblocking(bool nonblocking) {
-    return inner.get_inner()->set_nonblocking(nonblocking);
+    return io_source_inner_.get_inner()->set_nonblocking(nonblocking);
 }
 
 void simio::TcpListener::event_register(simio::Registry *registry, simio::Token token, simio::Interest interest) {
-    inner.event_register(registry, token, interest);
+    io_source_inner_.event_register(registry, token, interest);
 }
 void simio::TcpListener::event_reregister(simio::Registry *registry, simio::Token token, simio::Interest interest) {
-    inner.event_reregister(registry, token, interest);
+    io_source_inner_.event_reregister(registry, token, interest);
 }
 void simio::TcpListener::event_deregister(simio::Registry *registry) {
-    inner.event_deregister(registry);
+    io_source_inner_.event_deregister(registry);
 }

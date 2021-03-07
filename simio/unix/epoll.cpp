@@ -31,7 +31,7 @@ Selector::Selector()
       id(next_id.fetch_add(1, std::memory_order_seq_cst)) {
     if (ep < 0) {
         std::ostringstream error_stream;
-        error_stream << "Error in epoll id: " << id << " create. " << "Returned errno " << errno;
+        error_stream << "Error in epoll id_: " << id << " create. " << "Returned errno " << errno;
         std::string error = error_stream.str();
         throw std::system_error(errno, std::system_category(), error);
     }
@@ -44,14 +44,14 @@ Selector::~Selector() {
 // Selector::Selector(Selector &rhs)
 //     : ep(rhs.ep),
 //       has_waker(rhs.has_waker.load()),
-//       id(rhs.id) {
+//       id_(rhs.id_) {
 //
 // }
 //
 // Selector &Selector::operator=(Selector const &rhs) {
 //     if (this != &rhs) {
 //         ep = rhs.ep;
-//         id = rhs.id;
+//         id_ = rhs.id_;
 //         has_waker.store(rhs.has_waker.load());
 //     }
 //     return *this;
@@ -59,7 +59,7 @@ Selector::~Selector() {
 //
 // Selector::Selector(Selector &&rhs) noexcept: has_waker(false) {
 //     ep = rhs.ep;
-//     id = rhs.id;
+//     id_ = rhs.id_;
 //     bool pre_has_waker = rhs.has_waker.load();
 //     has_waker.store(pre_has_waker);
 // }
@@ -67,7 +67,7 @@ Selector::~Selector() {
 // Selector &Selector::operator=(Selector &&rhs) noexcept {
 //     if (this != &rhs) {
 //         ep = rhs.ep;
-//         id = rhs.id;
+//         id_ = rhs.id_;
 //         has_waker.store(rhs.has_waker.load());
 //     }
 //     return *this;
@@ -81,7 +81,7 @@ int Selector::select(EventList &events, int timeout_ms) const {
 
     if (num_events < 0) {
         std::ostringstream error_stream;
-        error_stream << "Error in epoll id: " << id << " select. " << "Returned errno " << errno;
+        error_stream << "Error in epoll id_: " << id << " select. " << "Returned errno " << errno;
         std::string error = error_stream.str();
         throw std::system_error(errno, std::system_category(), error);
     }
@@ -98,7 +98,7 @@ void Selector::event_register(int fd, Token token, const Interest &interest) con
 
     if (ret < 0) {
         std::ostringstream error_stream;
-        error_stream << "Error in epoll id: " << id << " register fd: " << fd << "Returned errno " << errno;
+        error_stream << "Error in epoll id_: " << id << " register fd: " << fd << "Returned errno " << errno;
         std::string error = error_stream.str();
         throw std::system_error(errno, std::system_category(), error);
     }
@@ -113,7 +113,7 @@ void Selector::event_reregister(int fd, Token token, const Interest &interest) c
 
     if (ret < 0) {
         std::ostringstream error_stream;
-        error_stream << "Error in epoll id: " << id << " reregister fd: " << fd << "Returned errno " << errno;
+        error_stream << "Error in epoll id_: " << id << " reregister fd: " << fd << "Returned errno " << errno;
         std::string error = error_stream.str();
         throw std::system_error(errno, std::system_category(), error);
     }
@@ -124,7 +124,7 @@ void Selector::event_deregister(int fd) const {
 
     if (ret < 0) {
         std::ostringstream error_stream;
-        error_stream << "Error in epoll id: " << id << " deregister fd: " << fd << "Returned errno " << errno;
+        error_stream << "Error in epoll id_: " << id << " deregister fd: " << fd << "Returned errno " << errno;
         std::string error = error_stream.str();
         throw std::system_error(errno, std::system_category(), error);
     }

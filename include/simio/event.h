@@ -5,8 +5,10 @@
 #ifndef SIMIO_INCLUDE_SIMIO_EVENT_H_
 #define SIMIO_INCLUDE_SIMIO_EVENT_H_
 
-#include "base.h"
-#include "unix.h"
+#include "simio/base/token.h"
+#include "simio/base/interest.h"
+
+#include "simio/sys.h"
 
 namespace simio {
 
@@ -30,27 +32,28 @@ class EventSource {
 class Event {
   public:
 
+    explicit Event(const sys::Event &ev) : inner_(ev) {}
+
     static Event from_sys_event(const sys::Event &ev) {
         return Event(ev);
     }
 
-    Token token() { return sys::get_token(inner); }
+    Token token() { return sys::get_token(inner_); }
 
-    bool is_readable() { return sys::is_readable(inner); }
+    bool is_readable() { return sys::is_readable(inner_); }
 
-    bool is_writable() { return sys::is_writable(inner); }
+    bool is_writable() { return sys::is_writable(inner_); }
 
-    bool is_priority() { return sys::is_priority(inner); }
+    bool is_priority() { return sys::is_priority(inner_); }
 
-    bool is_error() { return sys::is_error(inner); }
+    bool is_error() { return sys::is_error(inner_); }
 
-    bool is_read_closed() { return sys::is_read_closed(inner); }
+    bool is_read_closed() { return sys::is_read_closed(inner_); }
 
-    bool is_write_closed() { return sys::is_write_closed(inner); }
+    bool is_write_closed() { return sys::is_write_closed(inner_); }
 
   private:
-    explicit Event(const sys::Event &ev) : inner(ev) {}
-    sys::Event inner;
+    sys::Event inner_;
 };
 
 /// A list of event returned by Poll
@@ -66,7 +69,7 @@ class EventList {
     sys::EventList &as_vec() {
         return inner_;
     }
-    explicit EventList(int capacity) : inner_(sys::EventList(capacity)) {}
+    explicit EventList(int capacity) : inner_(sys::EventList(capacity)) { inner_.clear(); }
 
     uint32_t capacity() { return inner_.capacity(); }
 
