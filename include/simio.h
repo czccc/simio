@@ -17,8 +17,9 @@
 #include "simio/net/tcp_listener.h"
 #include "simio/net/tcp_stream.h"
 
-#include "simio/sys.h"
+#include "simio/reactor/event_loop.h"
 
+#include "simio/sys.h"
 #include "simio/event.h"
 #include "simio/io_source.h"
 
