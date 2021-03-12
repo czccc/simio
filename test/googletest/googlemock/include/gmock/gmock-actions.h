@@ -896,8 +896,8 @@ template<typename InnerAction, size_t... I>
 struct WithArgsAction {
     InnerAction action;
 
-    // The inner action could be anything convertible to Action<X>.
-    // We use the conversion operator to detect the signature of the inner Action.
+    // The inner_ action could be anything convertible to Action<X>.
+    // We use the conversion operator to detect the signature of the inner_ Action.
     template<typename R, typename... Args>
     operator Action<R(Args...)>() const {  // NOLINT
         Action < R(typename std::tuple_element<I, std::tuple<Args...>>::type...) >

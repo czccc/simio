@@ -1145,7 +1145,8 @@ using ::testing::Ge;
 Field(&Foo::number, Ge(3))
 ```
 
-matches a plain pointer `p` where `p->number >= 3`. If `p` is `NULL`, the match will always fail regardless of the inner
+matches a plain pointer `p` where `p->number >= 3`. If `p` is `NULL`, the match will always fail regardless of the
+inner_
 matcher.
 
 What if you want to validate more than one members at the same time? Remember that there
@@ -2333,7 +2334,7 @@ own adaptors. Here's the syntax:
 WithArgs<N1, N2, ..., Nk>(action)
 ```
 
-creates an action that passes the arguments of the mock function at the given indices (0-based) to the inner `action`
+creates an action that passes the arguments of the mock function at the given indices (0-based) to the inner_ `action`
 and performs it. Using `WithArgs`, our original example can be written as:
 
 ```cpp
@@ -2347,8 +2348,8 @@ using ::testing::WithArgs;
 
 For better readability, gMock also gives you:
 
-* `WithoutArgs(action)` when the inner `action` takes *no* argument, and
-* `WithArg<N>(action)` (no `s` after `Arg`) when the inner `action` takes
+* `WithoutArgs(action)` when the inner_ `action` takes *no* argument, and
+* `WithArg<N>(action)` (no `s` after `Arg`) when the inner_ `action` takes
   *one* argument.
 
 As you may have realized, `InvokeWithoutArgs(...)` is just syntactic sugar for
@@ -2356,13 +2357,13 @@ As you may have realized, `InvokeWithoutArgs(...)` is just syntactic sugar for
 
 Here are more tips:
 
-* The inner action used in `WithArgs` and friends does not have to be
+* The inner_ action used in `WithArgs` and friends does not have to be
   `Invoke()` -- it can be anything.
 * You can repeat an argument in the argument list if necessary, e.g.
   `WithArgs<2, 3, 3, 5>(...)`.
 * You can change the order of the arguments, e.g. `WithArgs<3, 2, 1>(...)`.
-* The types of the selected arguments do *not* have to match the signature of the inner action exactly. It works as long
-  as they can be implicitly converted to the corresponding arguments of the inner action. For example, if the 4-th
+* The types of the selected arguments do *not* have to match the signature of the inner_ action exactly. It works as
+  long as they can be implicitly converted to the corresponding arguments of the inner_ action. For example, if the 4-th
   argument of the mock function is an `int` and `my_action` takes a `double`, `WithArg<4>(my_action)` will work.
 
 ### Ignoring Arguments in Action Functions
@@ -2476,7 +2477,7 @@ using ::testing::Action;
 
 One oft-encountered problem with gMock is that it can be hard to test asynchronous behavior. Suppose you had
 a `EventQueue` class that you wanted to test, and you created a separate `EventDispatcher` interface so that you could
-easily mock it out. However, the implementation of the class fired all the events on a background thread, which made
+easily mock it out. However, the implementation of the class fired all the events_ on a background thread, which made
 test timings difficult. You could just insert `sleep()` statements and hope for the best, but that makes your test
 behavior nondeterministic. A better way is to use gMock actions and
 `Notification` objects to force your asynchronous test to behave synchronously.

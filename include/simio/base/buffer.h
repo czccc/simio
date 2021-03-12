@@ -8,12 +8,34 @@
 #include <vector>
 
 namespace simio {
+template<typename T>
 class Buffer {
   public:
-    Buffer(int size = 1024) : buffer_(1024) {}
+    explicit Buffer(T inner, int size = 1024) : inner_(inner), buffer_(1024), pos_(0), cap_(0) {}
     ~Buffer() = default;
+
+    int read(std::vector<char> &buf) {
+        if (pos_ == cap_ && buf.capacity() >= buffer_.capacity()) {
+            pos_ = 0;
+            cap_ = 0;
+            return inner_.read(buf);
+        }
+    }
+
+    int fill_buf() {
+        if (pos_ == cap_) {
+            cap_ = inner_.read(buffer_);
+            pos_ = 0;
+        }
+    }
   private:
+    std::vector<char> fill_buf() {
+    }
+
+    T inner_;
     std::vector<char> buffer_;
+    int pos_;
+    int cap_;
 };
 }
 

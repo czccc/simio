@@ -1107,7 +1107,7 @@ class GTEST_API_ AssertionException
 #endif  // GTEST_HAS_EXCEPTIONS
 
 // The interface for tracing execution of tests. The methods are organized in
-// the order the corresponding events are fired.
+// the order the corresponding events_ are fired.
 class TestEventListener {
   public:
     virtual ~TestEventListener() {}
@@ -1201,7 +1201,7 @@ class EmptyTestEventListener : public TestEventListener {
     void OnTestProgramEnd(const UnitTest & /*unit_test*/) override {}
 };
 
-// TestEventListeners lets users add listeners to track events in Google Test.
+// TestEventListeners lets users add listeners to track events_ in Google Test.
 class GTEST_API_ TestEventListeners {
   public:
     TestEventListeners();
@@ -1250,7 +1250,7 @@ class GTEST_API_ TestEventListeners {
 
     friend class internal::UnitTestImpl;
 
-    // Returns repeater that broadcasts the TestEventListener events to all
+    // Returns repeater that broadcasts the TestEventListener events_ to all
     // subscribers.
     TestEventListener *repeater();
 
@@ -1268,7 +1268,7 @@ class GTEST_API_ TestEventListeners {
     // nothing if the previous and the current listener objects are the same.
     void SetDefaultXmlGenerator(TestEventListener *listener);
 
-    // Controls whether events will be forwarded by the repeater to the
+    // Controls whether events_ will be forwarded by the repeater to the
     // listeners in the list.
     bool EventForwardingEnabled() const;
     void SuppressEventForwarding();
@@ -1410,7 +1410,7 @@ class GTEST_API_ UnitTest {
     // properties logged outside of individual test suites.
     const TestResult &ad_hoc_test_result() const;
 
-    // Returns the list of event listeners that can be used to track events
+    // Returns the list of event listeners that can be used to track events_
     // inside Google Test.
     TestEventListeners &listeners();
 

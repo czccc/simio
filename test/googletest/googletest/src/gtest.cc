@@ -3384,7 +3384,7 @@ void PrettyUnitTestResultPrinter::OnTestIterationEnd(const UnitTest &unit_test,
 
 // class TestEventRepeater
 //
-// This class forwards events to other event listeners.
+// This class forwards events_ to other event listeners.
 class TestEventRepeater : public TestEventListener {
   public:
     TestEventRepeater() : forwarding_enabled_(true) {}
@@ -3392,7 +3392,7 @@ class TestEventRepeater : public TestEventListener {
     void Append(TestEventListener *listener);
     TestEventListener *Release(TestEventListener *listener);
 
-    // Controls whether events will be forwarded to listeners_. Set to false
+    // Controls whether events_ will be forwarded to listeners_. Set to false
     // in death test child processes.
     bool forwarding_enabled() const { return forwarding_enabled_; }
     void set_forwarding_enabled(bool enable) { forwarding_enabled_ = enable; }
@@ -3420,10 +3420,10 @@ class TestEventRepeater : public TestEventListener {
     void OnTestProgramEnd(const UnitTest &unit_test) override;
 
   private:
-    // Controls whether events will be forwarded to listeners_. Set to false
+    // Controls whether events_ will be forwarded to listeners_. Set to false
     // in death test child processes.
     bool forwarding_enabled_;
-    // The list of listeners that receive events.
+    // The list of listeners that receive events_.
     std::vector<TestEventListener *> listeners_;
 
     GTEST_DISALLOW_COPY_AND_ASSIGN_(TestEventRepeater);
@@ -4544,7 +4544,7 @@ TestEventListener *TestEventListeners::Release(TestEventListener *listener) {
     return repeater_->Release(listener);
 }
 
-// Returns repeater that broadcasts the TestEventListener events to all
+// Returns repeater that broadcasts the TestEventListener events_ to all
 // subscribers.
 TestEventListener *TestEventListeners::repeater() { return repeater_; }
 
@@ -4578,7 +4578,7 @@ void TestEventListeners::SetDefaultXmlGenerator(TestEventListener *listener) {
     }
 }
 
-// Controls whether events will be forwarded by the repeater to the
+// Controls whether events_ will be forwarded by the repeater to the
 // listeners in the list.
 bool TestEventListeners::EventForwardingEnabled() const {
     return repeater_->forwarding_enabled();
@@ -4726,7 +4726,7 @@ TestSuite *UnitTest::GetMutableTestSuite(int i) {
     return impl()->GetMutableSuiteCase(i);
 }
 
-// Returns the list of event listeners that can be used to track events
+// Returns the list of event listeners that can be used to track events_
 // inside Google Test.
 TestEventListeners &UnitTest::listeners() {
     return *impl()->listeners();

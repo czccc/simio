@@ -71,9 +71,9 @@ void client_loop(string id) {
     while (true) {
         poll.poll(events, 1000);
         if (!events.as_vec().empty()) {
-            // std::cout << "client polled " << events.as_vec().size() << " events" << std::endl;
+            // std::cout << "client polled " << events_.as_vec().size() << " events_" << std::endl;
         }
-        // std::cout << "client polled " << events.as_vec().size() << " events" << std::endl;
+        // std::cout << "client polled " << events_.as_vec().size() << " events_" << std::endl;
         for (auto &&ev : events.as_vec()) {
             switch (Event::from_sys_event(ev).token()) {
                 case 1:
@@ -114,9 +114,9 @@ void server(string id) {
     while (true) {
         poll.poll(events, 1000);
         if (!events.as_vec().empty()) {
-            // std::cout << "server polled " << events.as_vec().size() << " events" << std::endl;
+            // std::cout << "server polled " << events_.as_vec().size() << " events_" << std::endl;
         }
-        // std::cout << "server polled " << events.as_vec().size() << " events" << std::endl;
+        // std::cout << "server polled " << events_.as_vec().size() << " events_" << std::endl;
         for (auto &&ev : events.as_vec()) {
             switch (Event::from_sys_event(ev).token()) {
                 case 0:

@@ -923,7 +923,7 @@ class GTEST_API_ UnitTestImpl {
     // test, and records the result in ad_hoc_test_result_.
     TestResult ad_hoc_test_result_;
 
-    // The list of event listeners that can be used to track events inside
+    // The list of event listeners that can be used to track events_ inside
     // Google Test.
     TestEventListeners listeners_;
 

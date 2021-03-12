@@ -897,7 +897,7 @@ Some tips on using `SCOPED_TRACE`:
    can know which iteration the failure is from.
 3. Sometimes the line number of the trace point is enough for identifying the particular invocation of a sub-routine. In
    this case, you don't have to choose a unique message for `SCOPED_TRACE`. You can simply use `""`.
-4. You can use `SCOPED_TRACE` in an inner scope when there is one in the outer scope. In this case, all active trace
+4. You can use `SCOPED_TRACE` in an inner_ scope when there is one in the outer scope. In this case, all active trace
    points will be included in the failure messages, in reverse order they are encountered.
 5. The trace dump is clickable in Emacs - hit `return` on a line number and you'll be taken to that line in the source
    file!
@@ -1762,9 +1762,9 @@ in `TestSuiteSetUp()`,
 ## Extending googletest by Handling Test Events
 
 googletest provides an **event listener API** to let you receive notifications about the progress of a test program and
-test failures. The events you can listen to include the start and end of the test program, a test suite, or a test
+test failures. The events_ you can listen to include the start and end of the test program, a test suite, or a test
 method, among others. You may use this API to augment or replace the standard console output, replace the XML output, or
-provide a completely different form of output, such as a GUI or a database. You can also use test events as checkpoints
+provide a completely different form of output, such as a GUI or a database. You can also use test events_ as checkpoints
 to implement a resource leak checker, for example.
 
 ### Defining Event Listeners

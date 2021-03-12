@@ -39,7 +39,7 @@ class TcpListener : public EventSource {
         return output;
     }
 
-    static TcpListener bind(SocketAddr addr);
+    static TcpListener bind(const SocketAddr &addr);
     static TcpListener bind(const std::string &addr);
     static TcpListener from_socket(TcpSocketPtr socket);
 

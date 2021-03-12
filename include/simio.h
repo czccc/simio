@@ -18,6 +18,9 @@
 #include "simio/net/tcp_stream.h"
 
 #include "simio/reactor/event_loop.h"
+#include "simio/reactor/task.h"
+#include "simio/reactor/acceptor.h"
+#include "simio/reactor/worker.h"
 
 #include "simio/sys.h"
 #include "simio/event.h"

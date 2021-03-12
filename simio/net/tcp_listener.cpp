@@ -5,7 +5,7 @@
 #include "simio/net/tcp_listener.h"
 #include "simio/net/tcp_stream.h"
 
-simio::TcpListener simio::TcpListener::bind(simio::SocketAddr addr) {
+simio::TcpListener simio::TcpListener::bind(const simio::SocketAddr &addr) {
     TcpSocketPtr socket(TcpSocket::new_for_addr(addr));
     socket->set_reuse_addr(true);
     socket->bind(addr);

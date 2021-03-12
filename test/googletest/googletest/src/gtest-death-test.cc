@@ -885,7 +885,7 @@ int FuchsiaDeathTest::Wait() {
   if (!spawned())
     return 0;
 
-  // Create a port to wait for socket/task/exception events.
+  // Create a port to wait for socket/task/exception events_.
   zx_status_t status_zx;
   zx::port port;
   status_zx = zx::port::create(0, &port);

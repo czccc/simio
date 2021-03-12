@@ -339,7 +339,7 @@ bool MatchPrintAndExplain(Value &value, const Matcher<T> &matcher,
                           MatchResultListener *listener) {
     if (!listener->IsInterested()) {
         // If the listener is not interested, we do not need to construct the
-        // inner explanation.
+        // inner_ explanation.
         return matcher.Matches(value);
     }
 
@@ -1611,7 +1611,7 @@ class PointeeMatcher {
 
     // This type conversion operator template allows Pointee(m) to be
     // used as a matcher for any pointer type whose pointee type is
-    // compatible with the inner matcher, where type Pointer can be
+    // compatible with the inner_ matcher, where type Pointer can be
     // either a raw pointer or a smart pointer.
     //
     // The reason we do this instead of relying on
@@ -1666,8 +1666,8 @@ class PointeeMatcher {
 
 // Implements the WhenDynamicCastTo<T>(m) matcher that matches a pointer or
 // reference that matches inner_matcher when dynamic_cast<T> is applied.
-// The result of dynamic_cast<To> is forwarded to the inner matcher.
-// If To is a pointer and the cast fails, the inner matcher will receive NULL.
+// The result of dynamic_cast<To> is forwarded to the inner_ matcher.
+// If To is a pointer and the cast fails, the inner_ matcher will receive NULL.
 // If To is a reference and the cast fails, this matcher returns false
 // immediately.
 template<typename To>
@@ -2223,7 +2223,7 @@ class WhenSortedByMatcher {
 
             if (!listener->IsInterested()) {
                 // If the listener is not interested, we do not need to
-                // construct the inner explanation.
+                // construct the inner_ explanation.
                 return matcher_.Matches(sorted_container);
             }
 
@@ -2295,7 +2295,7 @@ class PointwiseMatcher {
         typedef typename LhsView::type LhsStlContainer;
         typedef typename LhsView::const_reference LhsStlContainerReference;
         typedef typename LhsStlContainer::value_type LhsValue;
-        // We pass the LHS value and the RHS value to the inner matcher by
+        // We pass the LHS value and the RHS value to the inner_ matcher by
         // reference, as they may be expensive to copy.  We must use tuple
         // instead of pair here, as a pair cannot hold references (C++ 98,
         // 20.2.2 [lib.pairs]).
@@ -2554,7 +2554,7 @@ class KeyMatcherImpl : public MatcherInterface<PairType> {
         testing::SafeMatcherCast<const KeyType &>(inner_matcher)) {
     }
 
-    // Returns true if and only if 'key_value.first' (the key) matches the inner
+    // Returns true if and only if 'key_value.first' (the key) matches the inner_
     // matcher.
     bool MatchAndExplain(PairType key_value,
                          MatchResultListener *listener) const override {
@@ -3717,8 +3717,8 @@ inline internal::PointeeMatcher<InnerMatcher> Pointee(
 #if GTEST_HAS_RTTI
 // Creates a matcher that matches a pointer or reference that matches
 // inner_matcher when dynamic_cast<To> is applied.
-// The result of dynamic_cast<To> is forwarded to the inner matcher.
-// If To is a pointer and the cast fails, the inner matcher will receive NULL.
+// The result of dynamic_cast<To> is forwarded to the inner_ matcher.
+// If To is a pointer and the cast fails, the inner_ matcher will receive NULL.
 // If To is a reference and the cast fails, this matcher returns false
 // immediately.
 template<typename To>
@@ -3740,7 +3740,7 @@ internal::FieldMatcher<Class, FieldType>> Field(
     return MakePolymorphicMatcher(
         internal::FieldMatcher<Class, FieldType>(
             field, MatcherCast<const FieldType &>(matcher)));
-    // The call to MatcherCast() is required for supporting inner
+    // The call to MatcherCast() is required for supporting inner_
     // matchers of compatible types.  For example, it allows
     //   Field(&Foo::bar, m)
     // to compile where bar is an int32 and m is a matcher for int64.
@@ -3769,7 +3769,7 @@ Property(PropertyType (Class::*property)() const,
         internal::PropertyMatcher<Class, PropertyType,
                                   PropertyType (Class::*)() const>(
             property, MatcherCast<const PropertyType &>(matcher)));
-    // The call to MatcherCast() is required for supporting inner
+    // The call to MatcherCast() is required for supporting inner_
     // matchers of compatible types.  For example, it allows
     //   Property(&Foo::bar, m)
     // to compile where bar() returns an int32 and m is a matcher for int64.

@@ -12,10 +12,16 @@
 #include "simio/event.h"
 
 namespace simio {
-class Task {
+template<typename T>
+class IOStreamTask {
   public:
-    virtual void on_readable() = 0;
-    virtual void on_writable() = 0;
+    explicit IOStreamTask(T inner)
+        : inner_(inner), token_(global_next_token.fetch_add(1)), interest_(Interest::READABLE()) {}
+    IOStreamTask(T inner, Token token, Interest interest) : inner_(inner), token_(token), interest_(interest) {}
+
+    T inner_;
+    Token token_;
+    Interest interest_;
 };
 
 }
