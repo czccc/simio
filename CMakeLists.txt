@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 3.10)
 project(simio)
 
 # enable c++ 11
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(CMAKE_CXX_FLAGS_DEBUG_INIT "-std=c++11 -g -fno-omit-frame-pointer")
-set(CMAKE_CXX_FLAGS_RELEASE_INIT "-std=c++11 -g -O2")
+set(CMAKE_CXX_FLAGS_DEBUG_INIT "-std=c++17 -g -fno-omit-frame-pointer")
+set(CMAKE_CXX_FLAGS_RELEASE_INIT "-std=c++17 -g -O2")
 
 # default build type : Debug
 if (NOT CMAKE_BUILD_TYPE)
