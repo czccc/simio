@@ -7,42 +7,57 @@
 
 #include <map>
 
-#include "simio/reactor/event_loop.h"
 #include "simio/reactor/task.h"
 
 namespace simio {
 
 class Worker {
   public:
-    // Worker() : loop_();
+    Worker() : poller_(new Poll()) {};
 
-    // void add_task(Task task);
+    void set_receiver(std::unique_ptr<SpscReceiver < Task>>
+    receiver) {
+        receiver_ = std::move(receiver);
+    }
+
+    void check_new_task() {
+        while (receiver_->size() > 0) {
+            Task new_task = receiver_->recv();
+            poller_->get_registry()->event_register(&new_task.inner_, new_task.token_, new_task.interest_);
+            streams_.insert({new_task.token_, new_task});
+        }
+    }
 
     [[noreturn]] void start() {
         while (true) {
-            poller_->poll(events_, 1000);
-            for (auto &&ev : events_.as_vec()) {
-                Event event = Event::from_sys_event(ev);
-                auto item = token_map_.find(event.token());
-                switch (Event::from_sys_event(ev).token()) {
-                    case 0:
-                        try {
-                            // auto new_accept = listener.accept();
-                            // IOStreamTask<TcpStream> task = build_io_task(new_accept);
-                        } catch (std::system_error &e) {
-                            std::cout << "server" << e.what() << std::endl;
-                        }
-                        break;
-                    default:break;
+            check_new_task();
+            poller_->poll(events, 1000);
+            for (auto &&ev : events.as_vec()) {
+                Token token = Event::from_sys_event(ev).token();
+                auto task_it = streams_.find(token);
+                if (task_it == streams_.end()) {
+                    continue;
+                }
+                Task task = task_it->second;
+                task.process();
+                if (task.need_reregister_) {
+                    poller_->get_registry()->event_reregister(&task.inner_, task.token_, task.interest_);
+                    task.need_reregister_ = false;
+                }
+                if (task.need_deregister_) {
+                    poller_->get_registry()->event_deregister(&task.inner_);
+                    streams_.erase(task_it);
                 }
             }
         }
     }
-  private:
-    EventList events_{1024};
-    std::unique_ptr<Poll> poller_{};
 
-    std::map<Token, IOStreamTask < TcpStream>> token_map_{};
+  private:
+    EventList events{1024};
+    std::unique_ptr<Poll> poller_{nullptr};
+    std::map<Token, Task> streams_{};
+    std::unique_ptr<SpscReceiver < Task>> receiver_{ nullptr };
+
 };
 
 }
