@@ -17,7 +17,7 @@
 using namespace simio;
 using namespace std;
 
-Task on_accept(std::pair<simio::TcpStream, simio::SocketAddr> pair) {
+Task on_accept(const std::pair<simio::TcpStream, simio::SocketAddr> &pair) {
     cout << "Tcp accept: " << pair.second << endl;
     return Task(pair.first);
 }
